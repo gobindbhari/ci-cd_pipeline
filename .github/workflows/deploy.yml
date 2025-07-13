@@ -1,0 +1,31 @@
+name: Deploy to Ec2 Server
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.temp_backend_EC2_HOST }}     # EC2 IP
+          username: ubuntu
+          key: ${{ secrets.temp_backend_aws_ssh_key }}     # SSH private key from GitHub Secrets
+          script: |
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+            cd /home/ubuntu/temp-backend
+            echo "Pull latest code"
+            git fetch --all
+            git reset --hard origin/main
+            npm install
+            npm run build
+            /home/ubuntu/.nvm/versions/node/v22.17.0/bin/pm2 restart all || echo "PM2 restart failed"
