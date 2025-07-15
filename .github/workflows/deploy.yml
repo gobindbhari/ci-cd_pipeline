@@ -16,9 +16,9 @@ jobs:
       - name: Checkout code
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.temp_backend_EC2_HOST }}     # EC2 IP
+          host: ${{ secrets.backend_EC2_HOST }}     # EC2 IP
           username: ubuntu
-          key: ${{ secrets.temp_backend_aws_ssh_key }}     # SSH private key from GitHub Secrets
+          key: ${{ secrets.backend_aws_ssh_key }}     # SSH private key from GitHub Secrets
           script: |
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm

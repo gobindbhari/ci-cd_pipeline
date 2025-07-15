@@ -5,7 +5,7 @@ const port = 3000;
 
 // Route 1: Home
 app.get('/', (req: Request, res: Response) => {
-  res.send('Welcome to the Home Route!');
+  res.send('Welcome to the New Home Route!');
 });
 
 // Route 2: About

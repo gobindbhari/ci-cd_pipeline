@@ -41,9 +41,9 @@ jobs:
       - name: Deploy on EC2 with Docker Pull
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.temp_backend_EC2_HOST }}
+          host: ${{ secrets.backend_EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.temp_backend_aws_ssh_key }}
+          key: ${{ secrets.backend_aws_ssh_key }}
           script: |
             export IMAGE=${{ secrets.DOCKER_USERNAME }}/temp-backend:${{ github.sha }}
             export CONTAINER=temp-backend
