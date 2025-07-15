@@ -8,17 +8,12 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to the New Home Route!');
 });
 
-// Route 2: About
-app.get('/about', (req: Request, res: Response) => {
-  res.send('This is the About Route!');
+// Route: Health Check
+app.get('/api/health', (req: Request, res: Response) => {
+  res.status(200).json({ status: 'OK', message: 'Server is healthy' });
 });
 
-// Route 3: Contact
-app.get('/contact', (req: Request, res: Response) => {
-  res.send('Contact us at contact@example.com');
-});
-
-// Route 4: Products
+// Route 3: Products
 app.get('/products', (req: Request, res: Response) => {
   res.json([
     { id: 1, name: 'Product 1' },
@@ -27,10 +22,6 @@ app.get('/products', (req: Request, res: Response) => {
   ]);
 });
 
-// Route 5: Status
-app.get('/status', (req: Request, res: Response) => {
-  res.json({ status: 'Server is up and running' });
-});
 
 // Start the server
 app.listen(port, () => {
