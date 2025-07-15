@@ -30,8 +30,8 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            ${{secrets.DOCKER_USERNAME}}/temp-backend:${{github.SHA}}
-            ${{secrets.DOCKER_USERNAME}}/temp-backend:latest
+            ${{secrets.DOCKER_USERNAME}}/ci_cd_pipeline:${{github.SHA}}
+            ${{secrets.DOCKER_USERNAME}}/ci_cd_pipeline:latest
 
   deploy:
     needs: build-test
@@ -41,12 +41,12 @@ jobs:
       - name: Deploy on EC2 with Docker Pull
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.backend_EC2_HOST }}
+          host: ${{ secrets.BACKEND_EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.backend_aws_ssh_key }}
+          key: ${{ secrets.BACKEND_AWS_SSH_KEY }}
           script: |
-            export IMAGE=${{ secrets.DOCKER_USERNAME }}/temp-backend:${{ github.sha }}
-            export CONTAINER=temp-backend
+            export IMAGE=${{ secrets.DOCKER_USERNAME }}/ci_cd_pipeline:${{ github.sha }}
+            export CONTAINER=ci_cd_pipeline
             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             export DOCKER_PASSWORD=${{ secrets.DOCKER_PASSWORD }}
 
@@ -58,18 +58,18 @@ jobs:
             echo "Tagging current container image as rollback (if exists)"
             if docker inspect $CONTAINER &> /dev/null; then
               CURRENT_IMAGE=$(docker inspect --format='{{.Config.Image}}' $CONTAINER)
-              docker tag $CURRENT_IMAGE ${{ secrets.DOCKER_USERNAME }}/temp-backend:rollback
+              docker tag $CURRENT_IMAGE ${{ secrets.DOCKER_USERNAME }}/ci_cd_pipeline:rollback
               echo "Rollback tag created from current image: $CURRENT_IMAGE"
             fi
 
             echo "Clean up old container"
-            docker stop temp-backend || true
-            docker rm temp-backend || true
+            docker stop ci_cd_pipeline || true
+            docker rm ci_cd_pipeline || true
 
             echo "Run Docker container with PM2"
             docker run -d \
-              --name temp-backend \
-              -p 9000:8000 \
+              --name ci_cd_pipeline \
+              -p 9000:3000 \
               --restart unless-stopped \
               $IMAGE
             
@@ -84,19 +84,19 @@ jobs:
       - name: Rollback on EC2 if Deploy Fails
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ secrets.BACKEND_EC2_HOST }}
           username: ubuntu
-          key: ${{ secrets.temp-backend-ssh }}
+          key: ${{ secrets.BACKEND_AWS_SSH_KEY }}
           script: |
             echo "Deployment failed. Rolling back..."
 
-            docker stop temp-backend || true
-            docker rm temp-backend || true
+            docker stop ci_cd_pipeline || true
+            docker rm ci_cd_pipeline || true
 
             docker run -d \
-              --name temp-backend \
-              -p 9000:8000 \
+              --name ci_cd_pipeline \
+              -p 9000:3000 \
               --restart unless-stopped \
-              ${{ secrets.DOCKER_USERNAME }}/temp-backend:rollback
+              ${{ secrets.DOCKER_USERNAME }}/ci_cd_pipeline:rollback
 
             echo "Rollback complete."
